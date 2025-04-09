@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AxiosApiService } from './common/api.service';
-import { AuthBitrixService } from './auth_bitrix/auth.service';
+import { AuthBitrixService } from './bitrix24/auth_bitrix/auth.service';
 
 @Controller()
 export class AppController {
@@ -21,7 +21,7 @@ export class AppController {
     console.log(data);
     console.log('run install', data);
 
-    this.authBitrixService.writeFileTokenJson(data?.auth);
+    await this.authBitrixService.writeToken(data?.auth);
 
     // create install
     const bodyDataConnect = {
@@ -65,6 +65,17 @@ export class AppController {
         },
       );
       return { message: 'success', data: response.data };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @Post('handle_messages')
+  async handleListenMessagesEvent(@Body() body) {
+    try {
+      console.log('post-handle_chat_app', body?.data?.MESSAGES);
+
+      return { message: 'success', data: body };
     } catch (error) {
       console.log(error);
     }

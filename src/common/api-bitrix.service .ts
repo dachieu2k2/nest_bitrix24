@@ -1,23 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { AuthBitrixService } from 'src/bitrix24/auth_bitrix/auth.service';
 
-export interface RetryQueueItem {
-  resolve: (value?: any) => void;
-  reject: (error?: any) => void;
-  config: AxiosRequestConfig;
-}
-
 @Injectable()
-export class AxiosApiService {
+export class AxiosApiBitrixService {
   client: AxiosInstance;
-  refreshAndRetryQueue: RetryQueueItem[] = [];
-  isRefreshing = false;
   constructor(private readonly authService: AuthBitrixService) {
     this.client = axios.create({
       baseURL: process.env.BITRIX_API_URL,
       timeout: 30000,
       timeoutErrorMessage: '🚧🚧🚧 Server connection time out !',
+
       params: {
         auth: '',
       },
@@ -27,49 +21,21 @@ export class AxiosApiService {
       (response) => response,
       async (error) => {
         const originalRequest: AxiosRequestConfig = error?.config;
-        console.log('error interceptor', error);
 
-        if (error.response && error.response.status === 401) {
-          if (!this.isRefreshing) {
-            this.isRefreshing = true;
-            try {
-              const { refresh_token } = await authService.readToken();
-              if (refresh_token) {
-                const token = await authService.refreshToken(refresh_token);
-                if (token && token.access_token) {
-                  originalRequest.params['auth'] = token.access_token;
-                  return this.client(originalRequest);
-                }
-                // Repeat all miss request by 401
-                this.refreshAndRetryQueue.forEach(
-                  ({ config, resolve, reject }) => {
-                    this.client(config)
-                      .then((response) => resolve(response))
-                      .catch((err) => reject(err));
-                  },
-                );
-                this.refreshAndRetryQueue.length = 0;
-              } else {
-                return Promise.reject(error);
-              }
-            } catch (refreshError) {
-              this.refreshAndRetryQueue.length = 0;
-            } finally {
-              this.isRefreshing = false;
-            }
-          }
-          return new Promise<void>((resolve, reject) => {
-            this.refreshAndRetryQueue.push({
-              config: originalRequest,
-              resolve,
-              reject,
-            });
-          });
-        }
-
+        console.log(error.config);
         return Promise.reject(error);
       },
     );
+  }
+
+  // @Cron('*/5 * * * * *')
+  async handleRefreshToken() {
+    console.log('run hanndle');
+    const { refresh_token } = await this.authService.readToken();
+    if (refresh_token) {
+      await this.authService.refreshToken(refresh_token);
+      console.log('RefreshToken successfully!!!');
+    }
   }
 
   request = async (
