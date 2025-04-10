@@ -5,9 +5,10 @@ import { AxiosApiService } from 'src/common/api.service';
 import { Bitrix24Controller } from './bitrix24.controller';
 import { AuthBitrixModule } from './auth_bitrix/auth.module';
 import { MessagesModule } from './messages/messages.module';
+import { TerminusModule } from '@nestjs/terminus';
 
 @Module({
-  imports: [AuthBitrixModule, MessagesModule],
+  imports: [AuthBitrixModule, MessagesModule, TerminusModule],
   providers: [Bitrix24Service, AuthBitrixService, AxiosApiService],
   controllers: [Bitrix24Controller],
   exports: [AuthBitrixModule, MessagesModule],

@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AxiosApiService } from './common/api.service';
 import { AuthBitrixService } from './bitrix24/auth_bitrix/auth.service';
+import { ProducerService } from './queues/producer.service';
 
 @Controller()
 export class AppController {
@@ -9,6 +10,7 @@ export class AppController {
     private readonly appService: AppService,
     private readonly axiosApiService: AxiosApiService,
     private readonly authBitrixService: AuthBitrixService,
+    private producer: ProducerService,
   ) {}
 
   @Get()
@@ -74,6 +76,8 @@ export class AppController {
   async handleListenMessagesEvent(@Body() body) {
     try {
       console.log('post-handle_chat_app', body?.data?.MESSAGES);
+
+      await this.producer.addtoMessageQueue(body?.data?.MESSAGES);
 
       return { message: 'success', data: body };
     } catch (error) {

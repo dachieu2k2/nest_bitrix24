@@ -1,6 +1,81 @@
-import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
+import { AxiosError, AxiosRequestConfig } from 'axios';
+import { catchError, firstValueFrom, retry } from 'rxjs';
+import { AuthBitrixService } from './auth_bitrix/auth.service';
+import { Cron } from '@nestjs/schedule';
+import * as dns from 'dns/promises';
 
 @Injectable()
 export class Bitrix24Service {
-  constructor() {}
+  private readonly logger = new Logger(Bitrix24Service.name);
+  private requestConfig: AxiosRequestConfig = {
+    params: {
+      auth: '',
+    },
+  };
+
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly authBitrixService: AuthBitrixService,
+    private readonly authService: AuthBitrixService,
+  ) {}
+
+  private async checkInternet(): Promise<void> {
+    try {
+      await dns.lookup('google.com');
+    } catch (err) {
+      throw new InternalServerErrorException('No internet connection');
+    }
+  }
+
+  /**
+   * Call api bitrix to get data
+   * @param action crm.contact,get
+   * @param payload data example {username:'asd'}
+   * @returns data from bitrix24
+   */
+  async callApiBitrix24(action: string, payload: any) {
+    const { access_token, refresh_token } =
+      await this.authBitrixService.readToken();
+    this.requestConfig.params['auth'] = access_token;
+    return firstValueFrom(
+      this.httpService.post(action, payload, this.requestConfig).pipe(
+        catchError(async (error: AxiosError) => {
+          await this.checkInternet();
+          this.logger.error(error.response?.data);
+          console.log(error);
+
+          throw 'An error happened';
+        }),
+
+        retry(3),
+      ),
+    );
+  }
+
+  @Cron('* */45 * * * *')
+  async handleRefreshToken() {
+    console.log('refresh_token');
+    const { refresh_token } = await this.authService.readToken();
+    if (refresh_token) {
+      await this.authService.refreshToken(refresh_token);
+      console.log('RefreshToken successfully!!!');
+    }
+  }
+
+  findUser() {
+    return firstValueFrom(
+      this.httpService.post('user.current').pipe(
+        catchError((error: AxiosError) => {
+          this.logger.error(error.response?.data);
+          throw 'An error happened';
+        }),
+      ),
+    );
+  }
 }

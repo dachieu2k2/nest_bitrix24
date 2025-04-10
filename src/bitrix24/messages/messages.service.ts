@@ -4,6 +4,14 @@ import { UpdateMessageDto } from './dto/update-message.dto';
 
 @Injectable()
 export class MessagesService {
+  constructor() {}
+
+  async createMessage(message: any) {}
+
+  async receivedMessage(message: any) {
+    console.log('hanle message here');
+  }
+
   create(createMessageDto: CreateMessageDto) {
     return 'This action adds a new message';
   }

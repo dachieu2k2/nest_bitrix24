@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { Token } from './models/auth.model';
 import axios from 'axios';
@@ -8,6 +8,9 @@ import { Auth, AuthDocument } from './schemas/auth.schema';
 import { Model } from 'mongoose';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { CreateAuthDto } from './dto/create-auth.dto';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CacheKey } from 'src/utils/enum';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthBitrixService {
@@ -15,10 +18,21 @@ export class AuthBitrixService {
 
   constructor(
     @InjectModel(Auth.name) private readonly AuthModel: Model<AuthDocument>,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async readToken() {
-    return (await this.AuthModel.findOne({})) as unknown as CreateAuthDto;
+    const cachedData = await this.cacheManager.get(CacheKey.auth);
+    if (cachedData) {
+      console.log('Load from cached', cachedData);
+      return cachedData as CreateAuthDto;
+    }
+    console.log('Fetching data from database...');
+    const token = (await this.AuthModel.findOne(
+      {},
+    )) as unknown as CreateAuthDto;
+    await this.cacheManager.set(CacheKey.auth, token, 1000 * 60 * 60);
+    return token as CreateAuthDto;
   }
 
   async createTokenFirtTime() {
@@ -30,8 +44,7 @@ export class AuthBitrixService {
       new: true,
       upsert: true,
     });
-    console.log(tokenSaved);
-
+    await this.cacheManager.set(CacheKey.auth, tokenSaved, 1000 * 60 * 60);
     return tokenSaved;
   }
 
