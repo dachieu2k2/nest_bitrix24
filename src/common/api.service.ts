@@ -33,9 +33,9 @@ export class AxiosApiService {
           if (!this.isRefreshing) {
             this.isRefreshing = true;
             try {
-              const { refresh_token } = await authService.readToken();
-              if (refresh_token) {
-                const token = await authService.refreshToken(refresh_token);
+              const data = await authService.readToken('');
+              if (data.refresh_token) {
+                const token = await authService.refreshToken(data);
                 if (token && token.access_token) {
                   originalRequest.params['auth'] = token.access_token;
                   return this.client(originalRequest);
@@ -100,16 +100,18 @@ export class AxiosApiService {
    * @payload payload sent to Bitrix
    * @return return data after call api Bitrix
    */
-  callApiBitrix = async (action: any, payload: any) => {
-    try {
-      const { access_token } = await this.authService.readToken();
-      const response = await this.request(
-        { url: `${action}`, method: 'POST', data: payload },
-        { token: access_token },
-      );
-      return response;
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // callApiBitrix = async (action: any, payload: any) => {
+  //   try {
+  //     const { access_token } = await this.authService.readToken(
+  //       '',
+  //     );
+  //     const response = await this.request(
+  //       { url: `${action}`, method: 'POST', data: payload },
+  //       { token: access_token },
+  //     );
+  //     return response;
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 }

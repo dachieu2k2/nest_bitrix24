@@ -7,7 +7,6 @@ import {
 import { AxiosError, AxiosRequestConfig } from 'axios';
 import { catchError, firstValueFrom, retry } from 'rxjs';
 import { AuthBitrixService } from './auth_bitrix/auth.service';
-import { Cron } from '@nestjs/schedule';
 import * as dns from 'dns/promises';
 
 @Injectable()
@@ -39,9 +38,8 @@ export class Bitrix24Service {
    * @param payload data example {username:'asd'}
    * @returns data from bitrix24
    */
-  async callApiBitrix24(action: string, payload: any) {
-    const { access_token, refresh_token } =
-      await this.authBitrixService.readToken();
+  async callApiBitrix24(action: string, { member_id, ...payload }: any) {
+    const { access_token } = await this.authBitrixService.readToken(member_id);
     this.requestConfig.params['auth'] = access_token;
     return firstValueFrom(
       this.httpService.post(action, payload, this.requestConfig).pipe(
@@ -56,16 +54,6 @@ export class Bitrix24Service {
         retry(3),
       ),
     );
-  }
-
-  @Cron('* */45 * * * *')
-  async handleRefreshToken() {
-    console.log('refresh_token');
-    const { refresh_token } = await this.authService.readToken();
-    if (refresh_token) {
-      await this.authService.refreshToken(refresh_token);
-      console.log('RefreshToken successfully!!!');
-    }
   }
 
   findUser() {

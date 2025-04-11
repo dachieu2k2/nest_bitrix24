@@ -8,8 +8,8 @@ export class MessagesService {
 
   async createMessage(message: any) {}
 
-  async receivedMessage(message: any) {
-    console.log('hanle message here');
+  async receivedMessage(message: any, member_id: string) {
+    console.log('continue message workflow', message, member_id);
   }
 
   create(createMessageDto: CreateMessageDto) {

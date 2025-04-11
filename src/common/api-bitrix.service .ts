@@ -29,14 +29,16 @@ export class AxiosApiBitrixService {
   }
 
   // @Cron('*/5 * * * * *')
-  async handleRefreshToken() {
-    console.log('run hanndle');
-    const { refresh_token } = await this.authService.readToken();
-    if (refresh_token) {
-      await this.authService.refreshToken(refresh_token);
-      console.log('RefreshToken successfully!!!');
-    }
-  }
+  // async handleRefreshToken() {
+  //   console.log('run hanndle');
+  //   const data = await this.authService.readToken(
+  //     '',
+  //   );
+  //   if (data.refresh_token) {
+  //     await this.authService.refreshToken(data);
+  //     console.log('RefreshToken successfully!!!');
+  //   }
+  // }
 
   request = async (
     options: AxiosRequestConfig,
@@ -66,16 +68,16 @@ export class AxiosApiBitrixService {
    * @payload payload sent to Bitrix
    * @return return data after call api Bitrix
    */
-  callApiBitrix = async (action: any, payload: any) => {
-    try {
-      const { access_token } = await this.authService.readToken();
-      const response = await this.request(
-        { url: `${action}`, method: 'POST', data: payload },
-        { token: access_token },
-      );
-      return response;
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  // callApiBitrix = async (action: any, payload: any) => {
+  //   try {
+  //     const { access_token } = await this.authService.readToken('');
+  //     const response = await this.request(
+  //       { url: `${action}`, method: 'POST', data: payload },
+  //       { token: access_token },
+  //     );
+  //     return response;
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 }

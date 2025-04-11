@@ -23,7 +23,10 @@ export class ConsumerService implements OnModuleInit {
           if (message) {
             const content = JSON.parse(message.content.toString());
             this.logger.log('Received message:', content);
-            await this.messageService.receivedMessage(content);
+            await this.messageService.receivedMessage(
+              content.message,
+              content.member_id,
+            );
             channel.ack(message);
           }
         });

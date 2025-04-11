@@ -40,6 +40,12 @@ export class Auth {
 
   @Prop()
   application_token: string;
+
+  @Prop()
+  install_app: boolean;
+
+  @Prop()
+  is_active: boolean;
 }
 
 export const AuthSchema = SchemaFactory.createForClass(Auth);

@@ -11,6 +11,6 @@ import { TerminusModule } from '@nestjs/terminus';
   imports: [AuthBitrixModule, MessagesModule, TerminusModule],
   providers: [Bitrix24Service, AuthBitrixService, AxiosApiService],
   controllers: [Bitrix24Controller],
-  exports: [AuthBitrixModule, MessagesModule],
+  exports: [AuthBitrixModule, MessagesModule, Bitrix24Service],
 })
 export class Bitrix24Module {}

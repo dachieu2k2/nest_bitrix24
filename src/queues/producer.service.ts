@@ -6,6 +6,7 @@ import { MessgaeQueueEnum } from 'src/utils/enum';
 @Injectable()
 export class ProducerService {
   private channelWrapper: ChannelWrapper;
+  private connection;
   constructor() {
     const connection = amqp.connect([`amqp://localhost`]);
 
@@ -17,11 +18,11 @@ export class ProducerService {
       },
     });
   }
-  async addtoMessageQueue(message: any) {
+  async addtoMessageQueue(message: any, member_id: string) {
     try {
       await this.channelWrapper.sendToQueue(
         MessgaeQueueEnum.queueName,
-        Buffer.from(JSON.stringify(message)),
+        Buffer.from(JSON.stringify({ message, member_id })),
         {
           persistent: true,
         },
