@@ -9,7 +9,7 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CacheKey } from 'src/utils/enum';
 import { Cache } from 'cache-manager';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class AuthBitrixService implements OnModuleInit {
@@ -24,14 +24,12 @@ export class AuthBitrixService implements OnModuleInit {
     this.allDataNeedRefresh = await this.AuthModel.find({
       $or: [{ install_app: true }],
     }).select(['refresh_token', 'member_id']);
-    console.log('all account need refreshToken', this.allDataNeedRefresh);
   }
 
   async readToken(memberId: string) {
     const cachedData = await this.cacheManager.get(
       CacheKey.auth + ':' + memberId,
     );
-    console.log(cachedData, memberId);
     if (cachedData) {
       console.log('Load from cached', cachedData);
       return cachedData as CreateAuthDto;
@@ -73,8 +71,6 @@ export class AuthBitrixService implements OnModuleInit {
   async handleRefreshToken() {
     console.log('refresh_token');
     try {
-      console.log(this.allDataNeedRefresh);
-
       await Promise.all(
         this.allDataNeedRefresh.map((value) => {
           this.refreshToken(value);

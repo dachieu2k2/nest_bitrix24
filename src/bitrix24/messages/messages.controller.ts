@@ -33,7 +33,6 @@ export class MessagesController {
     @Payload() message: any,
     @Ctx() context: RmqContext,
   ) {
-    console.log(message);
     const channel = context.getChannelRef();
     const originalMsg = context.getMessage();
 

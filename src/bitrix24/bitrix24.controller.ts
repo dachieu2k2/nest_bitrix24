@@ -38,8 +38,6 @@ export class Bitrix24Controller {
       ...allData,
     });
 
-    // console.log(response?.data);
-
     return { hello: 'world', data: response?.data };
   }
 
@@ -47,10 +45,7 @@ export class Bitrix24Controller {
   @Get('/test-save-redis')
   async testRedis() {
     const data = await this.cacheManager.get('ddd');
-
     const data2 = await this.cacheManager.get('contacts_list');
-
-    console.log('run here tooo');
 
     return { data, data2 };
   }
@@ -59,8 +54,6 @@ export class Bitrix24Controller {
   @Get('/test-redis')
   async testSetRedis() {
     await this.cacheManager.set('ddd', 'hellow');
-
-    console.log('run here');
 
     return {};
   }
@@ -71,9 +64,6 @@ export class Bitrix24Controller {
       'user.current',
       {},
     );
-    console.log('run here');
-    console.log(response.data);
-
     return { currentUser: response.data };
   }
 
@@ -86,7 +76,6 @@ export class Bitrix24Controller {
       'crm.contact.list',
       {},
     );
-    console.log('run here');
 
     this.cacheManager.set('contacts_list', data.data?.result);
 

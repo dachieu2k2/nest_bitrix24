@@ -82,8 +82,6 @@ export class AxiosApiService {
       return response;
     };
     const onError = async (error: any) => {
-      console.log(process.env.BITRIX_API_URL, error, options);
-
       await Promise.reject({
         statusCode: error?.response?.status,
         error: error?.response?.data?.error,

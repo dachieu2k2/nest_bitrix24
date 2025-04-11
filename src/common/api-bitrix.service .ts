@@ -22,7 +22,6 @@ export class AxiosApiBitrixService {
       async (error) => {
         const originalRequest: AxiosRequestConfig = error?.config;
 
-        console.log(error.config);
         return Promise.reject(error);
       },
     );

@@ -22,9 +22,6 @@ export class AppController {
 
   @Post('install')
   async installApp(@Body() data) {
-    console.log(data);
-    console.log('run install', data);
-
     await this.authBitrixService.writeToken(
       { install_app: true, is_active: true, ...data?.auth },
       '',
@@ -63,12 +60,9 @@ export class AppController {
   @Post('handle_chat_app')
   async handleChatAppEvent(@Body() body) {
     try {
-      console.log('post-handle_chat_app', body);
       const { member_id, PLACEMENT_OPTIONS } = body;
 
       const setupApp = JSON.parse(PLACEMENT_OPTIONS);
-
-      console.log(setupApp);
 
       const response = await this.bitrix24Service.callApiBitrix24(
         'imconnector.activate',
@@ -114,7 +108,7 @@ export class AppController {
     @Param('member_id') member_id: string,
   ) {
     try {
-      console.log('post-handle_chat_app', body?.data?.MESSAGES);
+      // console.log('post-handle_chat_app', body?.data?.MESSAGES);
 
       await this.producer.addtoMessageQueue(body?.data?.MESSAGES, member_id);
 
@@ -128,11 +122,7 @@ export class AppController {
   @Get('handle_chat_app')
   async handleChatApp(@Body() body) {
     try {
-      console.log('get-handle_chat_app', body);
-
       const setupApp = JSON.parse(body.PLACEMENT_OPTIONS);
-
-      console.log(setupApp);
 
       const response = await this.bitrix24Service.callApiBitrix24(
         'imconnector.activate',
