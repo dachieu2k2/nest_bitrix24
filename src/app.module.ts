@@ -3,10 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Bitrix24Module } from './bitrix24/bitrix24.module';
 import { ConfigModule } from '@nestjs/config';
-import { AxiosApiService } from './common/api.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
-import { AxiosApiBitrixService } from './common/api-bitrix.service ';
 import { CacheModule } from '@nestjs/cache-manager';
 import configuration from './config/configuration';
 import { HttpModule } from '@nestjs/axios';
@@ -30,22 +28,17 @@ import { QueueModule } from './queues/queue.module';
       }),
       global: true,
     }),
-    MongooseModule.forRoot(`mongodb://localhost:27017/?directConnection=true`, {
-      dbName: 'bitrix_messages',
-    }),
-    // CacheModule.register({
-    //   store: redisStore,
-    //   host: '172.0.0.1',
-    //   port: 6379,
-    //   auth_pass: 1111,
-    //   isGlobal: true,
-    // }),
-
+    MongooseModule.forRoot(
+      `${process.env.MONGODB_HOST}:${process.env.MONGODB_POST}/?directConnection=true`,
+      {
+        dbName: process.env.MONGODB_DB_NAME,
+      },
+    ),
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: async () => {
         const redis = new KeyvRedis({
-          url: 'redis://default:1111@localhost:6379',
+          url: `redis://${process.env.REDIS_USER}:${process.env.REDIS_PASS}@${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
         });
 
         const store = new Keyv({ store: redis });
@@ -58,28 +51,11 @@ import { QueueModule } from './queues/queue.module';
             del: (key) => store.delete(key),
           },
         };
-
-        // return {
-        //   stores: [
-        //     new Keyv({
-        //       store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
-        //     }),
-        //     createKeyv('redis://localhost:6379'),
-        //   ],
-        // };
       },
     }),
     QueueModule,
-
-    // MongooseModule.forRootAsync({
-    //   imports: [ConfigModule.forRoot()],
-    //   useFactory: () => ({
-    //     uri: `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.epq0h.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`,
-
-    //   }),
-    // }),
   ],
   controllers: [AppController],
-  providers: [AppService, AxiosApiService, AxiosApiBitrixService],
+  providers: [AppService],
 })
 export class AppModule {}

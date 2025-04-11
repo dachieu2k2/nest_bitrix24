@@ -21,7 +21,6 @@ export class Bitrix24Service {
   constructor(
     private readonly httpService: HttpService,
     private readonly authBitrixService: AuthBitrixService,
-    private readonly authService: AuthBitrixService,
   ) {}
 
   private async checkInternet(): Promise<void> {

@@ -8,7 +8,6 @@ import {
   UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
-import { AxiosApiService } from 'src/common/api.service';
 import { Bitrix24Service } from './bitrix24.service';
 import {
   CACHE_MANAGER,

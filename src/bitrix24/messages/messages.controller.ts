@@ -10,13 +10,6 @@ import {
 import { MessagesService } from './messages.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.dto';
-import {
-  Ctx,
-  MessagePattern,
-  Payload,
-  RmqContext,
-} from '@nestjs/microservices';
-import { MessgaeQueueEnum } from 'src/utils/enum';
 
 @Controller('messages')
 export class MessagesController {
@@ -26,17 +19,6 @@ export class MessagesController {
   async create(@Body() createMessageDto: CreateMessageDto) {
     await this.messagesService.createMessage(createMessageDto);
     return { message: 'Message is processing !!!' };
-  }
-
-  @MessagePattern(MessgaeQueueEnum.queueName)
-  async handleMessagesCreated(
-    @Payload() message: any,
-    @Ctx() context: RmqContext,
-  ) {
-    const channel = context.getChannelRef();
-    const originalMsg = context.getMessage();
-
-    channel.ack(originalMsg);
   }
 
   @Get()

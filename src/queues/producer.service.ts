@@ -6,9 +6,8 @@ import { MessgaeQueueEnum } from 'src/utils/enum';
 @Injectable()
 export class ProducerService {
   private channelWrapper: ChannelWrapper;
-  private connection;
   constructor() {
-    const connection = amqp.connect([`amqp://localhost`]);
+    const connection = amqp.connect([`${process.env.RABBIT_MQ_URL}`]);
 
     this.channelWrapper = connection.createChannel({
       setup: (channel: Channel) => {

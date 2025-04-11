@@ -9,7 +9,7 @@ export class ConsumerService implements OnModuleInit {
   private readonly logger = new Logger(ConsumerService.name);
   private channelWrapper: ChannelWrapper;
   constructor(private messageService: MessagesService) {
-    const connection = amqp.connect([`amqp://localhost`]);
+    const connection = amqp.connect([`${process.env.RABBIT_MQ_URL}`]);
     this.channelWrapper = connection.createChannel();
   }
 
